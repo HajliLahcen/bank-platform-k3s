@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: flask-api
+  namespace: bank
+
+spec:
+  selector:
+    app: flask-api
+
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000

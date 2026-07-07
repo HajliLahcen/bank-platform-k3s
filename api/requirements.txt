@@ -1,0 +1,5 @@
+Flask
+Flask-Cors
+mysql-connector-python
+psycopg2-binary==2.9.10
+prometheus_client

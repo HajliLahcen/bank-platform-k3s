@@ -1,0 +1,31 @@
+grafana:
+
+  enabled: true
+
+  adminPassword: admin123
+
+prometheus:
+
+  prometheusSpec:
+
+    retention: 15d
+
+    storageSpec:
+
+      volumeClaimTemplate:
+
+        spec:
+
+          accessModes:
+
+            - ReadWriteOnce
+
+          resources:
+
+            requests:
+
+              storage: 3Gi
+
+alertmanager:
+
+  enabled: false

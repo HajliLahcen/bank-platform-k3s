@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: flask-api
+  namespace: bank
+
+spec:
+
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: flask-api
+
+  template:
+
+    metadata:
+      labels:
+        app: flask-api
+
+    spec:
+
+      containers:
+
+      - name: flask-api
+
+        image: hajlilahcen/flask-api:1
+
+        imagePullPolicy: Always
+
+        ports:
+
+        - containerPort: 8000
+
+        envFrom:
+
+        - configMapRef:
+            name: api-config
+
+        - secretRef:
+            name: api-secret

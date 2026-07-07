@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: bank-frontend
+  namespace: bank
+
+spec:
+
+  selector:
+    app: bank-frontend
+
+  ports:
+
+  - port: 80
+    targetPort: 80
