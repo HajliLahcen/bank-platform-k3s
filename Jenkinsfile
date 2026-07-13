@@ -1,25 +1,28 @@
 pipeline {
     agent {
         kubernetes {
-
-            defaultContainer 'busybox'
+            defaultContainer 'kaniko'
 
             yaml '''
 apiVersion: v1
 kind: Pod
-metadata:
-  labels:
-    app: jenkins-agent
 spec:
   serviceAccountName: jenkins
 
   containers:
-
-  - name: busybox
-    image: busybox:1.36
+  - name: kaniko
+    image: gcr.io/kaniko-project/executor:latest
     command:
-      - cat
+      - /busybox/cat
     tty: true
+    volumeMounts:
+      - name: docker-config
+        mountPath: /kaniko/.docker
+
+  volumes:
+    - name: docker-config
+      secret:
+        secretName: docker-config
 '''
         }
     }
@@ -32,27 +35,36 @@ spec:
             }
         }
 
-        stage('Environment') {
+        stage('Show Workspace') {
             steps {
-
-                sh 'echo "===== Jenkins Kubernetes Agent ====="'
-                sh 'hostname'
-                sh 'whoami'
+                sh 'echo "Current directory:"'
                 sh 'pwd'
+                sh 'echo "Repository content:"'
+                sh 'ls -R'
+            }
+        }
 
-                container('busybox') {
-                    sh 'echo "Repository content:"'
-                    sh 'ls -la'
-                }
-
+        stage('Build API Image') {
+            steps {
+                sh '''
+                /kaniko/executor \
+                  --context=$WORKSPACE \
+                  --dockerfile=$WORKSPACE/api/Dockerfile \
+                  --destination=hajlilahcen/flask-api:latest
+                  --cache=true
+                '''
             }
         }
 
     }
 
     post {
-        always {
-            echo "Pipeline finished successfully."
+        success {
+            echo 'API image successfully pushed to Docker Hub!'
+        }
+
+        failure {
+            echo 'Pipeline failed.'
         }
     }
 }
