@@ -1,11 +1,20 @@
 pipeline {
     agent {
         kubernetes {
+
+            defaultContainer 'busybox'
+
+            podRetention(onFailure())
+
             yaml '''
 apiVersion: v1
 kind: Pod
+metadata:
+  labels:
+    app: jenkins-agent
 spec:
   serviceAccountName: jenkins
+
   containers:
   - name: busybox
     image: busybox:1.36
@@ -13,20 +22,33 @@ spec:
       - cat
     tty: true
 '''
-            defaultContainer 'busybox'
         }
     }
 
     stages {
+
         stage('Environment') {
             steps {
-                sh 'echo "===== POD INFO ====="'
+
+                sh 'echo "===== Jenkins Kubernetes Agent ====="'
                 sh 'hostname'
                 sh 'whoami'
                 sh 'pwd'
-                sh 'kubectl version --client || true'
-                sh 'echo "Pipeline is running inside Kubernetes!"'
+
+                container('busybox') {
+                    sh 'echo "Hello from BusyBox!"'
+                    sh 'uname -a'
+                    sh 'ls -la'
+                }
+
             }
+        }
+
+    }
+
+    post {
+        always {
+            echo "Pipeline finished."
         }
     }
 }
