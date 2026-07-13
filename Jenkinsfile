@@ -4,8 +4,6 @@ pipeline {
 
             defaultContainer 'busybox'
 
-            podRetention(onFailure())
-
             yaml '''
 apiVersion: v1
 kind: Pod
@@ -16,6 +14,7 @@ spec:
   serviceAccountName: jenkins
 
   containers:
+
   - name: busybox
     image: busybox:1.36
     command:
@@ -27,6 +26,12 @@ spec:
 
     stages {
 
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
         stage('Environment') {
             steps {
 
@@ -36,8 +41,7 @@ spec:
                 sh 'pwd'
 
                 container('busybox') {
-                    sh 'echo "Hello from BusyBox!"'
-                    sh 'uname -a'
+                    sh 'echo "Repository content:"'
                     sh 'ls -la'
                 }
 
@@ -48,7 +52,7 @@ spec:
 
     post {
         always {
-            echo "Pipeline finished."
+            echo "Pipeline finished successfully."
         }
     }
 }
