@@ -1,35 +1,53 @@
 pipeline {
 
     agent {
-        label 'kaniko'
+        kubernetes {
+
+            defaultContainer 'jnlp'
+
+            yaml '''
+apiVersion: v1
+kind: Pod
+
+spec:
+
+  serviceAccountName: jenkins
+
+  containers:
+
+  - name: jnlp
+    image: jenkins/inbound-agent
+
+  - name: busybox
+    image: busybox
+    command:
+      - cat
+    tty: true
+
+'''
+        }
     }
 
     stages {
 
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
+        stage('Test') {
 
-        stage('Show Workspace') {
             steps {
-                sh '''
-                pwd
-                ls -R
-                '''
-            }
-        }
 
-        stage('Kaniko Test') {
-            steps {
-                container('kaniko') {
-                    sh '''
-                    echo "Running inside Kaniko"
-                    /kaniko/executor version
-                    '''
+                sh 'hostname'
+
+                sh 'pwd'
+
+                sh 'whoami'
+
+                container('busybox') {
+
+                    sh 'echo HELLO FROM BUSYBOX'
+
                 }
+
             }
+
         }
 
     }
