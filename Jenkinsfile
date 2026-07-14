@@ -11,7 +11,7 @@ spec:
 
   containers:
   - name: kaniko
-    image: gcr.io/kaniko-project/executor:latest
+    image: gcr.io/kaniko-project/executor:debug
     command:
       - /busybox/cat
     tty: true
@@ -29,30 +29,17 @@ spec:
 
     stages {
 
-        stage('Checkout') {
+        stage('Build Flask API') {
             steps {
-                checkout scm
-            }
-        }
-
-        stage('Show Workspace') {
-            steps {
-                sh 'echo "Current directory:"'
-                sh 'pwd'
-                sh 'echo "Repository content:"'
-                sh 'ls -R'
-            }
-        }
-
-        stage('Build API Image') {
-            steps {
-                sh '''
-                /kaniko/executor \
-                  --context=$WORKSPACE \
-                  --dockerfile=$WORKSPACE/api/Dockerfile \
-                  --destination=hajlilahcen/flask-api:latest
-                  --cache=true
-                '''
+                container('kaniko') {
+                    sh '''
+                    /kaniko/executor \
+                      --context=$WORKSPACE \
+                      --dockerfile=$WORKSPACE/api/Dockerfile \
+                      --destination=hajlilahcen/flask-api:latest \
+                      --cache=true
+                    '''
+                }
             }
         }
 
@@ -60,7 +47,7 @@ spec:
 
     post {
         success {
-            echo 'API image successfully pushed to Docker Hub!'
+            echo 'Flask API image successfully pushed to Docker Hub!'
         }
 
         failure {
