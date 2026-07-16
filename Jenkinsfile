@@ -71,7 +71,7 @@ spec:
 
                     sh '''
                     /kaniko/executor \
-                      --context=$WORKSPACE \
+                      --context=$WORKSPACE/api \
                       --dockerfile=$WORKSPACE/api/Dockerfile \
                       --destination=$REGISTRY/$IMAGE:$TAG \
                       --cache=true
