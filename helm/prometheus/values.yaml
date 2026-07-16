@@ -4,6 +4,10 @@ grafana:
 
   adminPassword: admin123
 
+  service:
+      type: NodePort
+      nodePort: 32500
+
 prometheus:
 
   prometheusSpec:
@@ -25,6 +29,10 @@ prometheus:
             requests:
 
               storage: 3Gi
+
+  service:
+      type: NodePort
+      nodePort: 31249
 
 alertmanager:
 

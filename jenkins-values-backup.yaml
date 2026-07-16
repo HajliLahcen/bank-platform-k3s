@@ -1,0 +1,19 @@
+USER-SUPPLIED VALUES:
+controller:
+  admin:
+    password: admin123
+    username: admin
+  installPlugins:
+  - kubernetes
+  - workflow-aggregator
+  - git
+  - github
+  - docker-workflow
+  - configuration-as-code
+  - credentials
+  - pipeline-stage-view
+  nodePort: 32080
+  serviceType: NodePort
+persistence:
+  enabled: true
+  size: 10Gi

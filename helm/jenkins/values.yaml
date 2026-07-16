@@ -1,0 +1,29 @@
+controller:
+
+  admin:
+    username: admin
+    password: admin123
+
+  serviceType: NodePort
+  nodePort: 32080
+
+  serviceAccount:
+    create: true
+    name: jenkins
+
+  installPlugins:
+    - kubernetes
+    - workflow-aggregator
+    - git
+    - github
+    - docker-workflow
+    - configuration-as-code
+    - credentials
+    - pipeline-stage-view
+
+  JCasC:
+    defaultConfig: true
+
+persistence:
+  enabled: true
+  size: 10Gi
