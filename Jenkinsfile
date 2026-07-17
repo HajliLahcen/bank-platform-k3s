@@ -90,7 +90,7 @@ spec:
         }
 
         always {
-            cleanWs()
+             deleteDir()
         }
     }
 }
