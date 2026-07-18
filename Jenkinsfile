@@ -180,7 +180,7 @@ spec:
         }
 
         always {
-            deleteDir()
+            echo "Pipeline finished."
         }
     }
 }
