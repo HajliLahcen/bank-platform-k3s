@@ -3,7 +3,7 @@ api:
   replicaCount: 2
   image:
     repository: hajlilahcen/flask-api
-    tag: "28"
+    tag: "29"
     pullPolicy: Always
   service:
     port: 8000
@@ -11,7 +11,7 @@ frontend:
   replicaCount: 2
   image:
     repository: hajlilahcen/bank-frontend
-    tag: "28"
+    tag: "29"
     pullPolicy: Always
   service:
     port: 80
