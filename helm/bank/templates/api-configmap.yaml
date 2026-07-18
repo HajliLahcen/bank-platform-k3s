@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: api-config
+  namespace: bank
+
+data:
+
+  DB_HOST: postgres
+
+  DB_NAME: bankdb
+
+  DB_USER: bankuser

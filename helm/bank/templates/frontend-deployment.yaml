@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: bank-frontend
+  namespace: {{ .Values.namespace }}
+
+spec:
+  replicas: {{ .Values.frontend.replicaCount }}
+
+  selector:
+    matchLabels:
+      app: bank-frontend
+
+  template:
+    metadata:
+      labels:
+        app: bank-frontend
+
+    spec:
+      containers:
+        - name: bank-frontend
+
+          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+
+          ports:
+            - containerPort: 80
