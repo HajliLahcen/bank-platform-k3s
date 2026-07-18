@@ -1,35 +1,25 @@
 namespace: bank
-
 api:
   replicaCount: 2
-
   image:
     repository: hajlilahcen/flask-api
-    tag: "1"
+    tag: "28"
     pullPolicy: Always
-
   service:
     port: 8000
-
 frontend:
   replicaCount: 2
-
   image:
     repository: hajlilahcen/bank-frontend
-    tag: "1"
+    tag: "28"
     pullPolicy: Always
-
   service:
     port: 80
-
 postgres:
   replicaCount: 1
-
   image:
     repository: postgres
     tag: "15"
-
   storage: 2Gi
-
-#ingress:
- # host: node1
+  #ingress:
+# host: node1
