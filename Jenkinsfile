@@ -8,7 +8,6 @@ pipeline {
             yaml """
 apiVersion: v1
 kind: Pod
-
 spec:
 
   serviceAccountName: jenkins
@@ -43,12 +42,8 @@ spec:
     }
 
     environment {
-
         API_IMAGE = "hajlilahcen/flask-api"
         FRONTEND_IMAGE = "hajlilahcen/bank-frontend"
-
-        GIT_REPO = "https://github.com/hajlilahcen/bank-platform-k3s.git"
-
         VALUES_FILE = "helm/bank/values.yaml"
     }
 
@@ -61,13 +56,9 @@ spec:
         }
 
         stage('Build Flask API') {
-
             steps {
-
                 container('kaniko') {
-
                     sh """
-
                     echo "Building Flask API..."
 
                     /kaniko/executor \
@@ -76,20 +67,15 @@ spec:
                       --destination=${API_IMAGE}:${BUILD_NUMBER} \
                       --destination=${API_IMAGE}:latest \
                       --cache=true
-
                     """
                 }
             }
         }
 
         stage('Build Frontend') {
-
             steps {
-
                 container('kaniko') {
-
                     sh """
-
                     echo "Building Frontend..."
 
                     /kaniko/executor \
@@ -98,46 +84,30 @@ spec:
                       --destination=${FRONTEND_IMAGE}:${BUILD_NUMBER} \
                       --destination=${FRONTEND_IMAGE}:latest \
                       --cache=true
-
                     """
                 }
-
             }
-
         }
 
         stage('Update Helm Values') {
-
             steps {
-
                 container('tools') {
-
                     sh """
-
                     echo "Updating Helm values..."
 
                     yq -i '.api.image.tag="${BUILD_NUMBER}"' ${VALUES_FILE}
-
                     yq -i '.frontend.image.tag="${BUILD_NUMBER}"' ${VALUES_FILE}
 
                     echo "Updated values.yaml"
-
                     cat ${VALUES_FILE}
-
                     """
-
                 }
-
             }
-
         }
 
         stage('Commit & Push') {
-
             steps {
-
                 container('tools') {
-
                     withCredentials([
                         usernamePassword(
                             credentialsId: 'github-token',
@@ -146,30 +116,42 @@ spec:
                         )
                     ]) {
 
-                        sh """
+                        sh '''
+                        set -e
 
-                        git config --global user.email "jenkins@local"
+                        echo "===== Configure Git ====="
 
-                        git config --global user.name "Jenkins"
+                        git config --global --add safe.directory ${WORKSPACE}
 
-                        git add ${VALUES_FILE}
+                        git config --global user.email "ci@bank-platform.local"
+                        git config --global user.name "Jenkins CI"
 
-                        git diff --cached --quiet && exit 0
+                        git status
+
+                        echo "===== Add changes ====="
+
+                        git add helm/bank/values.yaml
+
+                        if git diff --cached --quiet; then
+                            echo "No changes detected."
+                            exit 0
+                        fi
+
+                        echo "===== Commit ====="
 
                         git commit -m "[skip ci] Update image tags to build ${BUILD_NUMBER}"
 
-                        git remote set-url origin https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/hajlilahcen/bank-platform-k3s.git
+                        echo "===== Push ====="
+
+                        git remote set-url origin https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/HajliLahcen/bank-platform-k3s.git
 
                         git push origin HEAD:main
 
-                        """
-
+                        echo "Push completed successfully."
+                        '''
                     }
-
                 }
-
             }
-
         }
 
     }
@@ -178,42 +160,27 @@ spec:
 
         success {
 
-            echo "=============================================="
-
-            echo "Build Successful"
-
-            echo "API Image:"
-            echo "${API_IMAGE}:${BUILD_NUMBER}"
-
-            echo "Frontend Image:"
-            echo "${FRONTEND_IMAGE}:${BUILD_NUMBER}"
-
-            echo "Helm updated"
-
-            echo "Git pushed"
-
-            echo "ArgoCD will deploy automatically"
-
-            echo "=============================================="
+            echo "========================================"
+            echo "Pipeline completed successfully!"
+            echo "API Image: ${API_IMAGE}:${BUILD_NUMBER}"
+            echo "Frontend Image: ${FRONTEND_IMAGE}:${BUILD_NUMBER}"
+            echo "Helm values updated"
+            echo "GitHub updated"
+            echo "ArgoCD will sync automatically"
+            echo "========================================"
 
         }
 
         failure {
 
-            echo "=============================================="
-
-            echo "Pipeline Failed"
-
-            echo "=============================================="
+            echo "========================================"
+            echo "Pipeline failed!"
+            echo "========================================"
 
         }
 
         always {
-
             deleteDir()
-
         }
-
     }
-
 }
