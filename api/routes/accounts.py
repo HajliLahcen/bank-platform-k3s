@@ -1,5 +1,7 @@
 from flask import Blueprint, jsonify, request
+import time
 
+from utils.metrics import REQUEST_COUNT, REQUEST_LATENCY
 from services.account_service import (
     get_all_accounts,
     get_account,
@@ -13,7 +15,18 @@ accounts_bp = Blueprint("accounts", __name__)
 @accounts_bp.route("/accounts", methods=["GET"])
 def get_accounts():
 
+    start = time.time()
+
+    REQUEST_COUNT.labels(
+        method="GET",
+        endpoint="/accounts"
+    ).inc()
+
     accounts = get_all_accounts()
+
+    REQUEST_LATENCY.observe(
+        time.time() - start
+    )
 
     return jsonify(
         [account.to_dict() for account in accounts]
