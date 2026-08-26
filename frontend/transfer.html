@@ -867,29 +867,25 @@ async function loadAccounts() {
 
     try {
 
-        const response =
+        /*
+         * /accounts now returns ONLY the
+         * authenticated user's account.
+         */
+
+        const accountResponse =
             await apiFetch(
                 "/accounts"
             );
 
-
-        const accounts =
-            await response.json();
-
-
-        const user =
-            getUser();
-
-
         const currentAccount =
-            accounts.find(
-                account =>
-                    account.username ===
-                    user.username
-            );
+            await accountResponse.json();
 
 
-        if (currentAccount) {
+        /*
+         * Update dashboard balance.
+         */
+
+        if (accountResponse.ok) {
 
             document.getElementById(
                 "totalBalance"
@@ -903,6 +899,23 @@ async function loadAccounts() {
         }
 
 
+        /*
+         * Load transfer beneficiaries.
+         *
+         * IMPORTANT:
+         * This endpoint returns usernames only.
+         * No balances are exposed.
+         */
+
+        const beneficiaryResponse =
+            await apiFetch(
+                "/beneficiaries"
+            );
+
+        const beneficiaries =
+            await beneficiaryResponse.json();
+
+
         const select =
             document.getElementById(
                 "to"
@@ -913,40 +926,23 @@ async function loadAccounts() {
             '<option value="">Select account</option>';
 
 
-        accounts.forEach(
-            account => {
+        beneficiaries.forEach(
+            beneficiary => {
 
-                if (
-                    account.username !==
-                    user.username
-                ) {
-
-                    const option =
-                        document.createElement(
-                            "option"
-                        );
-
-
-                    option.value =
-                        account.username;
-
-
-                    option.textContent =
-                        account.username +
-                        " — " +
-                        Number(
-                            account.balance
-                        ).toLocaleString(
-                            "en-US"
-                        ) +
-                        " MAD";
-
-
-                    select.appendChild(
-                        option
+                const option =
+                    document.createElement(
+                        "option"
                     );
 
-                }
+                option.value =
+                    beneficiary.username;
+
+                option.textContent =
+                    beneficiary.username;
+
+                select.appendChild(
+                    option
+                );
 
             }
         );
@@ -962,6 +958,7 @@ async function loadAccounts() {
     }
 
 }
+
 
 
 /* =========================
@@ -1114,9 +1111,6 @@ async function makeTransfer() {
                     method: "POST",
 
                     body: JSON.stringify({
-
-                        from:
-                            getUser().username,
 
                         to,
 

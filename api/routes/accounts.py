@@ -5,6 +5,7 @@ from flask_jwt_extended import jwt_required, get_jwt
 
 from utils.metrics import REQUEST_COUNT, REQUEST_LATENCY
 from services.account_service import (
+    get_all_accounts,
     get_account,
     create_account
 )
@@ -40,6 +41,26 @@ def get_accounts():
     return jsonify(
         account.to_dict()
     )
+
+
+@accounts_bp.route("/beneficiaries", methods=["GET"])
+@jwt_required()
+def get_beneficiaries():
+
+    claims = get_jwt()
+    current_username = claims.get("username")
+
+    accounts = get_all_accounts()
+
+    beneficiaries = [
+        {
+            "username": account.username
+        }
+        for account in accounts
+        if account.username != current_username
+    ]
+
+    return jsonify(beneficiaries)
 
 
 @accounts_bp.route("/accounts", methods=["POST"])
@@ -110,7 +131,10 @@ def get_balance(username):
     claims = get_jwt()
     current_username = claims.get("username")
 
-    if claims.get("role") != "ADMIN" and username != current_username:
+    if (
+        claims.get("role") != "ADMIN"
+        and username != current_username
+    ):
         return jsonify({
             "error": "you can only access your own balance"
         }), 403
